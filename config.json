@@ -1,0 +1,13 @@
+{
+  "InfoBloxHelper": {
+    "username": "admin",
+    "password": "Zuerich#14",
+    "credential": "YWRtaW46WnVlcmljaCMxNA==",
+    "serveruri": "104.210.216.95",
+    "api_route": "wapi",
+    "api_version": "v2.9",
+    "network_path": "network",
+    "accept_any_SSL": true
+
+  }
+}
