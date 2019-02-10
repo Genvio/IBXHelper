@@ -32,10 +32,10 @@ namespace KPMG.KTech.Automation.InfoBlox
             // https://10.10.10.10/wapi/v2.9/network
 
             string apifunction = "network";
-            bool _acceptInvalidSSL = true;
 
-            UriBuilder uriBuilder = new UriBuilder();
+            // UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
+            uriBuilder.Port = port;
             uriBuilder.Host = helperConfig.ServerUri;
             uriBuilder.Path = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
 
@@ -70,15 +70,14 @@ namespace KPMG.KTech.Automation.InfoBlox
             string refnetwork = "ZG5zLm5ldHdvcmskMTAuMTI4LjAuMC8yNC8w";
             string apicommand = "_function=next_available_ip";
 
-            UriBuilder uriBuilder = new UriBuilder();
+            // UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
+            uriBuilder.Port = port;
             uriBuilder.Host = helperConfig.ServerUri;
             uriBuilder.Path = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}/{refnetwork}";
             uriBuilder.Query = apicommand;
 
             string iprequested = new IpRequest(totalIPRequested).ToJson();
-
-            //            NewMethod(_acceptInvalidSSL);
 
             HttpRequestMessage _reqMessage = new HttpRequestMessage();
 
@@ -152,14 +151,9 @@ namespace KPMG.KTech.Automation.InfoBlox
         //Configuration settings for the Helper
         private HelperConfiguration helperConfig;
 
-        const string scheme = "https";
-        private string username;
-        private string password;
-        private string credentials;
-        private string apiPath;
-        private string apiversion;
-        private string apifunction;
-        private bool acceptInvalidSSL;
+        const string scheme = "https"; //TLS protocol.
+        const int port = 443; // TLS or SSL default port. Adjust as needed.
+        private bool acceptAnySsl = false;
 
         #endregion
 
@@ -195,17 +189,17 @@ namespace KPMG.KTech.Automation.InfoBlox
         Helper()
         {
             RetrieveConfiguration();
-
+            SslBypassCheck();
         }
 
-        private void NewMethod(bool _acceptInvalidSSL) //TODO: Config and SSL bypass
+        private void SslBypassCheck() //TODO: Config and SSL bypass
         {
             //The request will not validate the certificate from the server (testing/poc) -- DO NOT DEPLOY in production with the flag equals to true
-            if (_acceptInvalidSSL)
+            if (acceptAnySsl)
             {
                 //Accept all server certificate (Y/n)
                 handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => { return _acceptInvalidSSL; };
+                handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => { return acceptAnySsl; };
 
                 //The HttpClient is pooled to increase performance and scalability of connections.
                 if (!isClientInitialized)
@@ -238,20 +232,9 @@ namespace KPMG.KTech.Automation.InfoBlox
 
                 helperConfig = config.GetSection("InfoBloxHelper").Get<HelperConfiguration>();
 
-                //Create the credentials for the helper once so that they are used across the helper functions.
-                if (!String.IsNullOrEmpty(helperConfig.Credential))
-                {
-                    httpclientAuthHeaderValue = new AuthenticationHeaderValue("Basic", helperConfig.Credential);
-                }
-                else if (String.IsNullOrEmpty(helperConfig.Credential) && !String.IsNullOrEmpty(helperConfig.Username) && !String.IsNullOrEmpty(helperConfig.Password))
-                {
-                    helperConfig.Credential = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{helperConfig.Username}:{helperConfig.Password}"));
-                    httpclientAuthHeaderValue = new AuthenticationHeaderValue("Basic", helperConfig.Credential);
-                }
-                else if (String.IsNullOrEmpty(helperConfig.Username) || String.IsNullOrEmpty(helperConfig.Password))
-                {
-                    throw new System.Exception();
-                }
+                CreateAutorizationContext();
+
+                acceptAnySsl = helperConfig.AcceptAnySsl;
             }
             catch (System.Exception)
             {
@@ -261,6 +244,25 @@ namespace KPMG.KTech.Automation.InfoBlox
 
         }
 
+        private void CreateAutorizationContext()
+        {
+
+            //Create the credentials for the helper once so that they are used across the helper functions.
+            if (!String.IsNullOrEmpty(helperConfig.Credential)) // We have a credential already in place, we use that instead of the user/pass
+            {
+                httpclientAuthHeaderValue = new AuthenticationHeaderValue("Basic", helperConfig.Credential);
+                return;
+            }
+            else if (String.IsNullOrEmpty(helperConfig.Credential) && !String.IsNullOrEmpty(helperConfig.Username) && !String.IsNullOrEmpty(helperConfig.Password)) //we don't have the credentials but we have user/pass, we generate the credentials.
+            {
+                helperConfig.Credential = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{helperConfig.Username}:{helperConfig.Password}"));
+                httpclientAuthHeaderValue = new AuthenticationHeaderValue("Basic", helperConfig.Credential);
+            }
+            else if (String.IsNullOrEmpty(helperConfig.Username) || String.IsNullOrEmpty(helperConfig.Password) && String.IsNullOrEmpty(helperConfig.Credential))
+            {
+                throw new System.Exception();
+            }
+        }
     }
 }
 
