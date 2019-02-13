@@ -34,6 +34,7 @@
     <Reference Include="Genvio.Utility">
       <HintPath>.\lib\Genvio.Utility.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
     </Reference>
 
   </ItemGroup>
