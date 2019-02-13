@@ -19,10 +19,17 @@ namespace Library.Test
         private static Helper infoBloxHelper = Helper.Instance;
 
         [TestMethod]
-        public async Task TestRetrieveNetworks()
+        public async Task RetrieveNetworks()
         {
             List<InfobloxNetwork> _lstNetworks = await infoBloxHelper.RetrieveNetworkLists();
             Assert.IsTrue(_lstNetworks.Count == 3);
+        }
+
+        [TestMethod]
+        public async Task RetrieveIP()
+        {
+            var _ipResult = await infoBloxHelper.RetrieveIP(5);
+            CollectionAssert.AllItemsAreNotNull(_ipResult.IPAddresses);
         }
 
     }

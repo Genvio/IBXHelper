@@ -165,6 +165,10 @@ namespace KPMG.KTech.Automation.InfoBlox.Model
 
         [JsonProperty("acceptanySSL")]
         public bool AcceptAnySsl { get; set; }
+
+        [JsonProperty("defaultnetworkcidr")]
+        public string DefaultNetworkCIDR { get; set; }
+
     }
 
     #endregion
