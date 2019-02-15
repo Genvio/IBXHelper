@@ -235,6 +235,8 @@ namespace KPMG.KTech.Automation.InfoBlox
 
                 CreateAutorizationContext();
 
+                SelectDefaultSubnet();
+
                 acceptAnySsl = helperConfig.AcceptAnySsl;
             }
             catch (System.Exception)
@@ -243,6 +245,13 @@ namespace KPMG.KTech.Automation.InfoBlox
                 throw;
             }
 
+        }
+
+        private void SelectDefaultSubnet()
+        {
+
+
+            //throw new NotImplementedException();s
         }
 
         private void CreateAutorizationContext()
