@@ -112,18 +112,33 @@ namespace InfoBlox.Automation.Model
         [JsonProperty("name")]
         public string Name { get; set; }
 
+        [JsonProperty("_ref")]
+        public string Reference { get; set; }
+
         [JsonProperty("ipv4addrs")]
-        //public Ipv4Addr[] Ipv4Addrs { get; set; }
-        List<Ipv4Addr> Ipv4Addrs { get; set; }
+        public Ipv4Address[] Ipv4Addresses { get; set; }
+
+        [JsonProperty("view")]
+        public string View { get; set; }
     }
     public partial class HostRecord
     {
         public static HostRecord FromJson(string json) => JsonConvert.DeserializeObject<HostRecord>(json, Converter.Settings);
     }
-    public partial class Ipv4Addr
+
+    public partial class Ipv4Address
     {
+        [JsonProperty("_ref")]
+        public string Reference { get; set; }
+
+        [JsonProperty("configure_for_dhcp")]
+        public bool ConfigureForDhcp { get; set; }
+
+        [JsonProperty("host")]
+        public string Host { get; set; }
+
         [JsonProperty("ipv4addr")]
-        public string Ipv4AddrField { get; set; }
+        public string Value { get; set; }
     }
 
     #endregion

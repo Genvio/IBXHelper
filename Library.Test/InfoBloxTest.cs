@@ -21,14 +21,14 @@ namespace Library.Test
         [TestMethod]
         public async Task RetrieveNetworks()
         {
-            List<InfobloxNetwork> _lstNetworks = await infoBloxHelper.RetrieveNetworkListsAsync();
+            List<InfobloxNetwork> _lstNetworks = await infoBloxHelper.GetNetworkListsAsync();
             Assert.IsTrue(_lstNetworks.Count == 3);
         }
 
         [TestMethod]
         public async Task RetrieveIP()
         {
-            var _ipResult = await infoBloxHelper.RetrieveIPAsync(5);
+            var _ipResult = await infoBloxHelper.GetIPAsync(5);
             CollectionAssert.AllItemsAreNotNull(_ipResult.IPAddresses);
         }
 

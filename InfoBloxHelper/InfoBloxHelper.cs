@@ -27,7 +27,7 @@ namespace InfoBlox.Automation
     {
 
         //InfoBlox specific options.
-        public async Task<List<InfobloxNetwork>> RetrieveNetworkListsAsync()
+        public async Task<List<InfobloxNetwork>> GetNetworkListsAsync()
         {
 
             // https://10.10.10.10/wapi/v2.9/network
@@ -57,12 +57,12 @@ namespace InfoBlox.Automation
             return InfobloxNetwork.FromJson(content);
         }
 
-        public async Task<IpResult> RetrieveIPAsync(int totalIPRequested = 1)
+        public async Task<IpResult> GetIPAsync(int totalIPRequested = 1)
         {
-            return await RetrieveIPAsync(totalIPRequested, String.Empty);
+            return await GetIPAsync(totalIPRequested, String.Empty);
         }
 
-        public async Task<IpResult> RetrieveIPAsync(int totalIPRequested = 1, string subnetIp = "")
+        public async Task<IpResult> GetIPAsync(int totalIPRequested = 1, string subnetIp = "")
         {
             // https://10.10.10.10/wapi/v2.9/network/ZG5zLm5ldHdvcmskMTAuMTI4LjAuMC8yNC8w?_function=next_available_ip
 
@@ -102,13 +102,72 @@ namespace InfoBlox.Automation
 
             return IpResult.FromJson(content);
         }
-
-        public async Task<string> CreateHostRecordAsync(string HostName, string HostMac = null)
+        public async Task<HostRecord> GetHostRecordAsync(string HostName)
         {
+            //https://10.10.10.10/wapi/v2.9/record:host?name~=host.url.path
 
-            // https://10.10.10.10/wapi/v2.9/record:host
+            if (String.IsNullOrEmpty(HostName))
+            {
+                return null;
+            }
 
             string apifunction = "record:host";
+            string apicommand = $"name~={HostName}";
+
+            UriBuilder uriBuilder = new UriBuilder();
+            uriBuilder.Scheme = scheme;
+            uriBuilder.Host = helperConfig.ServerUri;
+            uriBuilder.Path = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
+            uriBuilder.Query = apicommand;
+
+            HttpRequestMessage _reqMessage = new HttpRequestMessage();
+
+            _reqMessage.Headers.Authorization = httpclientAuthHeaderValue;
+
+            _reqMessage.RequestUri = uriBuilder.Uri;
+            _reqMessage.Method = HttpMethod.Get;
+
+            HttpResponseMessage _httpResponse = await httpClient.SendAsync(_reqMessage);
+
+            //Get the response back
+            string content = _httpResponse.Content.ReadAsStringAsync().Result;
+
+            _httpResponse.EnsureSuccessStatusCode();
+
+            return (HostRecord.FromJson(content));
+        }
+
+        //Function to call when the library will automatically fetch the next IP Address and pass the value of the hostname
+        public async Task<string> CreateHostRecordAsync(string HostName, string HostMac = null)
+        {
+            if (String.IsNullOrEmpty(HostName))
+            {
+                return null;
+            }
+
+            IpResult nextIP = this.GetIPAsync(1).Result;
+
+            return this.CreateHostRecordAsync(HostName, nextIP.IPAddresses[0], null).ToString();
+
+        }
+        public async Task<string> CreateHostRecordAsync(string HostName, string Ipv4Address, string HostMac = null)
+        {
+            // https://10.10.10.10/wapi/v2.9/record:host
+
+            if (String.IsNullOrEmpty(HostName) || string.IsNullOrEmpty(Ipv4Address))
+            {
+                return null;
+            }
+
+            string apifunction = "record:host";
+
+            //Single line model construct. Pick your poison by uncommenting the chosen method. ;-)
+            //HostRecord newHost = new HostRecord() { Name = HostName, Ipv4Addresses = new Ipv4Address[] { new Ipv4Address() { Value = Ipv4Address } } };
+
+            //Multi-line model construct. Pick your poison by uncommenting the chosen method. ;-)
+            HostRecord newHost = new HostRecord();
+            newHost.Name = HostName;
+            newHost.Ipv4Addresses = new Ipv4Address[] { new Ipv4Address() { Value = Ipv4Address } };
 
             UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
@@ -121,7 +180,8 @@ namespace InfoBlox.Automation
 
             _reqMessage.RequestUri = uriBuilder.Uri;
             _reqMessage.Method = HttpMethod.Post;
-            //   _reqMessage.Content = new StringContent(iprequested, Encoding.UTF8, "application/json");
+            //Payload of Record goes here.
+            _reqMessage.Content = new StringContent(newHost.ToJson(), Encoding.UTF8, "application/json");
 
 
             HttpResponseMessage _httpResponse = await httpClient.SendAsync(_reqMessage);
@@ -134,12 +194,13 @@ namespace InfoBlox.Automation
 
 
             // return IpResult.FromJson(content);
-            return (null);
+            return (content);
         }
         public async Task UpdateHostRecordAsync()
         { }
         public async Task DeleteHostRecordAsync()
         { }
+
 
     }
 
@@ -205,7 +266,7 @@ namespace InfoBlox.Automation
         {
             try
             {
-                infoBloxSubnets = await this.RetrieveNetworkListsAsync();
+                infoBloxSubnets = await this.GetNetworkListsAsync();
                 //SelectDefaultSubnetAsync(infoBloxSubnets);
             }
             catch (System.Exception)
