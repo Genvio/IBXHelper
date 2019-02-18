@@ -7,8 +7,8 @@ namespace Library.Test
     using System.Threading;
     using System.Threading.Tasks;
     using System.Collections.Generic;
-    using KPMG.KTech.Automation.InfoBlox;
-    using KPMG.KTech.Automation.InfoBlox.Model;
+    using InfoBlox.Automation;
+    using InfoBlox.Automation.Model;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -21,14 +21,14 @@ namespace Library.Test
         [TestMethod]
         public async Task RetrieveNetworks()
         {
-            List<InfobloxNetwork> _lstNetworks = await infoBloxHelper.RetrieveNetworkLists();
+            List<InfobloxNetwork> _lstNetworks = await infoBloxHelper.RetrieveNetworkListsAsync();
             Assert.IsTrue(_lstNetworks.Count == 3);
         }
 
         [TestMethod]
         public async Task RetrieveIP()
         {
-            var _ipResult = await infoBloxHelper.RetrieveIP(5);
+            var _ipResult = await infoBloxHelper.RetrieveIPAsync(5);
             CollectionAssert.AllItemsAreNotNull(_ipResult.IPAddresses);
         }
 

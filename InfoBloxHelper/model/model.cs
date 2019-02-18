@@ -16,7 +16,7 @@ using Newtonsoft.Json.Converters;
 
 #endregion
 
-namespace KPMG.KTech.Automation.InfoBlox.Model
+namespace InfoBlox.Automation.Model
 {
     #region  InfoBlox Models
 
@@ -173,7 +173,6 @@ namespace KPMG.KTech.Automation.InfoBlox.Model
 
     #endregion
 
-
     #region JsonUtilities
 
     //Serialization and Deserialization components.
@@ -200,5 +199,4 @@ namespace KPMG.KTech.Automation.InfoBlox.Model
         };
     }
     #endregion
-
 }

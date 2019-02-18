@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfoBloxHelper", "InfoBloxH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library.Test", "Library.Test\Library.Test.csproj", "{F70E3932-4F46-42E4-AC62-4CF929C5CE6A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{883A5DD0-0453-446D-9A44-FAB829531958}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{F70E3932-4F46-42E4-AC62-4CF929C5CE6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F70E3932-4F46-42E4-AC62-4CF929C5CE6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F70E3932-4F46-42E4-AC62-4CF929C5CE6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{883A5DD0-0453-446D-9A44-FAB829531958}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{883A5DD0-0453-446D-9A44-FAB829531958}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{883A5DD0-0453-446D-9A44-FAB829531958}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{883A5DD0-0453-446D-9A44-FAB829531958}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

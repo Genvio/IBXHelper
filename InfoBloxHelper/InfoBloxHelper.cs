@@ -17,17 +17,17 @@ using Newtonsoft.Json.Converters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Binder;
 using Genvio.Utility;
-using KPMG.KTech.Automation.InfoBlox.Model;
+using InfoBlox.Automation.Model;
 
 #endregion
 
-namespace KPMG.KTech.Automation.InfoBlox
+namespace InfoBlox.Automation
 {
     public sealed partial class Helper
     {
 
         //InfoBlox specific options.
-        public async Task<List<InfobloxNetwork>> RetrieveNetworkLists()
+        public async Task<List<InfobloxNetwork>> RetrieveNetworkListsAsync()
         {
 
             // https://10.10.10.10/wapi/v2.9/network
@@ -57,7 +57,12 @@ namespace KPMG.KTech.Automation.InfoBlox
             return InfobloxNetwork.FromJson(content);
         }
 
-        public async Task<IpResult> RetrieveIP(int totalIPRequested = 1)
+        public async Task<IpResult> RetrieveIPAsync(int totalIPRequested = 1)
+        {
+            return await RetrieveIPAsync(totalIPRequested, String.Empty);
+        }
+
+        public async Task<IpResult> RetrieveIPAsync(int totalIPRequested = 1, string subnetIp = "")
         {
             // https://10.10.10.10/wapi/v2.9/network/ZG5zLm5ldHdvcmskMTAuMTI4LjAuMC8yNC8w?_function=next_available_ip
 
@@ -98,7 +103,7 @@ namespace KPMG.KTech.Automation.InfoBlox
             return IpResult.FromJson(content);
         }
 
-        public async Task<string> CreateHostRecord(string HostName, string HostMac = null)
+        public async Task<string> CreateHostRecordAsync(string HostName, string HostMac = null)
         {
 
             // https://10.10.10.10/wapi/v2.9/record:host
@@ -131,9 +136,9 @@ namespace KPMG.KTech.Automation.InfoBlox
             // return IpResult.FromJson(content);
             return (null);
         }
-        public async Task UpdateHostRecord()
+        public async Task UpdateHostRecordAsync()
         { }
-        public async Task DeleteHostRecord()
+        public async Task DeleteHostRecordAsync()
         { }
 
     }
@@ -154,7 +159,9 @@ namespace KPMG.KTech.Automation.InfoBlox
 
         const string scheme = "https"; //TLS protocol.
         const int port = 443; // TLS or SSL default port. Adjust as needed.
-        private bool acceptAnySsl = false;
+        private static bool acceptAnySsl = false;
+
+        private static List<InfobloxNetwork> infoBloxSubnets;
 
         #endregion
 
@@ -189,18 +196,36 @@ namespace KPMG.KTech.Automation.InfoBlox
 
         Helper()
         {
-            RetrieveConfiguration();
-            SslBypassCheck();
+            RetrieveConfigurationAsync().Wait();
+            SslBypassCheckAsync().Wait();
+            RefreshSubnetsAsync().Wait();
         }
 
-        private void SslBypassCheck() //TODO: Config and SSL bypass
+        private async Task RefreshSubnetsAsync()
+        {
+            try
+            {
+                infoBloxSubnets = await this.RetrieveNetworkListsAsync();
+                //SelectDefaultSubnetAsync(infoBloxSubnets);
+            }
+            catch (System.Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private static async Task SslBypassCheckAsync()
         {
             //The request will not validate the certificate from the server (testing/poc) -- DO NOT DEPLOY in production with the flag equals to true
             if (acceptAnySsl)
             {
                 //Accept all server certificate (Y/n)
-                handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => { return acceptAnySsl; };
+                await Task.Run(() =>
+                {
+                    handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+                    handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => { return acceptAnySsl; };
+                });
 
                 //The HttpClient is pooled to increase performance and scalability of connections.
                 if (!isClientInitialized)
@@ -214,30 +239,33 @@ namespace KPMG.KTech.Automation.InfoBlox
             {
 
                 //The HttpClient is pooled to increase performance and scalability of connections.
-                if (!isClientInitialized)
+                await Task.Run(() =>
                 {
-                    httpClient = new HttpClient();
-                    isClientInitialized = true;
-                }
+                    if (!isClientInitialized)
+                    {
+                        httpClient = new HttpClient();
+                        isClientInitialized = true;
+                    }
+                });
             }
         }
 
-
-        private void RetrieveConfiguration()
+        private async Task RetrieveConfigurationAsync()
         {
             try
             {
-                var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", false, true);
+                await Task.Run(() =>
+                {
+                    var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", false, true);
 
-                var config = builder.Build();
+                    var config = builder.Build();
 
-                helperConfig = config.GetSection("InfoBloxHelper").Get<HelperConfiguration>();
+                    helperConfig = config.GetSection("InfoBloxHelper").Get<HelperConfiguration>();
 
-                CreateAutorizationContext();
+                    CreateAutorizationContextAsync().Wait();
 
-                SelectDefaultSubnet();
-
-                acceptAnySsl = helperConfig.AcceptAnySsl;
+                    acceptAnySsl = helperConfig.AcceptAnySsl;
+                });
             }
             catch (System.Exception)
             {
@@ -247,31 +275,29 @@ namespace KPMG.KTech.Automation.InfoBlox
 
         }
 
-        private void SelectDefaultSubnet()
+
+        private async Task CreateAutorizationContextAsync()
         {
 
-
-            //throw new NotImplementedException();s
-        }
-
-        private void CreateAutorizationContext()
-        {
-
-            //Create the credentials for the helper once so that they are used across the helper functions.
-            if (!String.IsNullOrEmpty(helperConfig.Credential)) // We have a credential already in place, we use that instead of the user/pass
+            await Task.Run(() =>
             {
-                httpclientAuthHeaderValue = new AuthenticationHeaderValue("Basic", helperConfig.Credential);
-                return;
-            }
-            else if (String.IsNullOrEmpty(helperConfig.Credential) && !String.IsNullOrEmpty(helperConfig.Username) && !String.IsNullOrEmpty(helperConfig.Password)) //we don't have the credentials but we have user/pass, we generate the credentials.
-            {
-                helperConfig.Credential = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{helperConfig.Username}:{helperConfig.Password}"));
-                httpclientAuthHeaderValue = new AuthenticationHeaderValue("Basic", helperConfig.Credential);
-            }
-            else if (String.IsNullOrEmpty(helperConfig.Username) || String.IsNullOrEmpty(helperConfig.Password) && String.IsNullOrEmpty(helperConfig.Credential))
-            {
-                throw new System.Exception();
-            }
+                //Create the credentials for the helper once so that they are used across the helper functions.
+                if (!String.IsNullOrEmpty(helperConfig.Credential)) // We have a credential already in place, we use that instead of the user/pass
+                {
+                    httpclientAuthHeaderValue = new AuthenticationHeaderValue("Basic", helperConfig.Credential);
+                    return;
+                }
+                else if (String.IsNullOrEmpty(helperConfig.Credential) && !String.IsNullOrEmpty(helperConfig.Username) && !String.IsNullOrEmpty(helperConfig.Password)) //we don't have the credentials but we have user/pass, we generate the credentials.
+                {
+                    helperConfig.Credential = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{helperConfig.Username}:{helperConfig.Password}"));
+                    httpclientAuthHeaderValue = new AuthenticationHeaderValue("Basic", helperConfig.Credential);
+                    return;
+                }
+                else if (String.IsNullOrEmpty(helperConfig.Username) || String.IsNullOrEmpty(helperConfig.Password) && String.IsNullOrEmpty(helperConfig.Credential))
+                {
+                    throw new System.Exception();
+                }
+            });
         }
     }
 }
