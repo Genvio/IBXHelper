@@ -313,11 +313,17 @@ namespace InfoBlox.Automation
 
         private async Task RetrieveConfigurationAsync()
         {
+            //@{ var dataFileName = Environment.GetEnvironmentVariable("HOME").ToString() + "\\site\\wwwroot\\data.txt"; } Option 1
+            //Path.Combine(System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath, "file_at_root.txt");
+
+
             try
             {
                 await Task.Run(() =>
                 {
-                    var builder = new ConfigurationBuilder().SetBasePath(System.Environment.CurrentDirectory).AddJsonFile("appsettings.json", false, true);
+                    string configPath = Environment.GetEnvironmentVariable("HOME").ToString() + "\\site\\wwwroot\\";
+
+                    var builder = new ConfigurationBuilder().SetBasePath(configPath).AddJsonFile("appsettings.json", false, true);
 
                     var config = builder.Build();
 
