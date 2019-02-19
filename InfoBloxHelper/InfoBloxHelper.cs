@@ -326,7 +326,7 @@ namespace InfoBlox.Automation
                         configPath = Environment.GetEnvironmentVariable("HOME") + "\\site\\wwwroot\\";
                     else
                         configPath = System.Environment.CurrentDirectory;
-                    configPath += "\\lib\\";
+                    configPath += "\\lib";
 
                     var builder = new ConfigurationBuilder().SetBasePath(configPath).AddJsonFile("appsettings.json", false, true);
 
