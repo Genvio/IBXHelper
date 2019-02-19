@@ -317,7 +317,7 @@ namespace InfoBlox.Automation
             {
                 await Task.Run(() =>
                 {
-                    var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", false, true);
+                    var builder = new ConfigurationBuilder().SetBasePath(System.Environment.CurrentDirectory).AddJsonFile("appsettings.json", false, true);
 
                     var config = builder.Build();
 
