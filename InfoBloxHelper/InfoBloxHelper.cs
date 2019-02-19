@@ -321,7 +321,12 @@ namespace InfoBlox.Automation
             {
                 await Task.Run(() =>
                 {
-                    string configPath = Environment.GetEnvironmentVariable("HOME").ToString() + "\\site\\wwwroot\\";
+                    string configPath = "";
+                    if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HOME")))
+                        configPath = Environment.GetEnvironmentVariable("HOME") + "\\site\\wwwroot\\";
+                    else
+                        configPath = System.Environment.CurrentDirectory;
+                    configPath += "\\lib\\";
 
                     var builder = new ConfigurationBuilder().SetBasePath(configPath).AddJsonFile("appsettings.json", false, true);
 
