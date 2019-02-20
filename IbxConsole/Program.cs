@@ -28,7 +28,7 @@
             Console.WriteLine(_ip);
             Console.ReadLine();
 
-            //AddNewRecord();
+            var recordaccept = AddNewRecord();
             //Console.ReadLine();
 
             //RetrieveIP(5).Wait();
@@ -50,7 +50,7 @@
 
         public static async Task<string> AddNewRecord()
         {
-            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo-antonio.kpmg.msft.cloud");
+            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo1-antonio.kpmg.msft.cloud");
             return (_IpHostRecord);
         }
     }

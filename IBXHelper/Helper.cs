@@ -118,6 +118,7 @@ namespace InfoBlox.Automation
 
             UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
+            uriBuilder.Port = port;
             uriBuilder.Host = helperConfig.ServerUri;
             uriBuilder.Path = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
             uriBuilder.Query = apicommand;
@@ -147,9 +148,9 @@ namespace InfoBlox.Automation
                 return null;
             }
 
-            IpResult nextIP = this.GetIPAsync(1).Result;
+            IpResult nextIP = instance.GetIPAsync(1).Result;
 
-            return this.CreateHostRecordAsync(HostName, nextIP.IPAddresses[0], null).ToString();
+            return instance.CreateHostRecordAsync(HostName, nextIP.IPAddresses[0], null).Result.ToString();
 
         }
         public async Task<string> CreateHostRecordAsync(string HostName, string Ipv4Address, string HostMac = null)
@@ -173,6 +174,7 @@ namespace InfoBlox.Automation
 
             UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
+            uriBuilder.Port = port;
             uriBuilder.Host = helperConfig.ServerUri;
             uriBuilder.Path = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
 
