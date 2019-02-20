@@ -1,5 +1,5 @@
 
-namespace Library.Test
+namespace IBX.Library.Test
 {
     using System;
     using System.Net;
@@ -13,7 +13,7 @@ namespace Library.Test
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class InfoBloxTest
+    public class HelperTest
     {
 
         private static Helper infoBloxHelper = Helper.Instance;

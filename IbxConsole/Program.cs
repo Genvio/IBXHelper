@@ -1,4 +1,4 @@
-﻿namespace ConsoleApp
+﻿namespace IBX.Console
 {
     using System;
     using System.Net;
@@ -16,18 +16,18 @@
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Hello InfoBlox Helper Console!");
             var nets = RetrieveNetworks().Result;
             Console.WriteLine(JsonConvert.SerializeObject(nets));
             Console.ReadLine();
 
             //RetrieveIP().Wait();
-            var _ip = Task<string>.Run(action: () => { RetrieveIP().Wait(); });
+            var _ip = RetrieveIP().Result;
             Console.WriteLine(_ip);
             Console.ReadLine();
 
-            AddNewRecord();
-            Console.ReadLine();
+            //AddNewRecord();
+            //Console.ReadLine();
 
             //RetrieveIP(5).Wait();
         }

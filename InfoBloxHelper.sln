@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 15.0.28307.329
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfoBloxHelper", "InfoBloxHelper\InfoBloxHelper.csproj", "{3947F84C-CE15-44A9-A536-21CEAFDECEDA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBXHelper", "IBXHelper\IBXHelper.csproj", "{3947F84C-CE15-44A9-A536-21CEAFDECEDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library.Test", "Library.Test\Library.Test.csproj", "{F70E3932-4F46-42E4-AC62-4CF929C5CE6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBX-Library.Test", "IBX-Library.Test\IBX-Library.Test.csproj", "{F70E3932-4F46-42E4-AC62-4CF929C5CE6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{883A5DD0-0453-446D-9A44-FAB829531958}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IbxConsole", "IbxConsole\IbxConsole.csproj", "{883A5DD0-0453-446D-9A44-FAB829531958}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

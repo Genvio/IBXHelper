@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\InfoBloxHelper\InfoBloxHelper.csproj" />
+    <ProjectReference Include="..\IBXHelper\IBXHelper.csproj" />
   </ItemGroup>
 
   <ItemGroup>
