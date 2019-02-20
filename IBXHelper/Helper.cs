@@ -25,7 +25,6 @@ namespace InfoBlox.Automation
 {
     public sealed partial class Helper
     {
-
         //InfoBlox specific options.
         public async Task<List<InfobloxNetwork>> GetNetworkListsAsync()
         {
@@ -346,8 +345,6 @@ namespace InfoBlox.Automation
             }
 
         }
-
-
         private async Task CreateAutorizationContextAsync()
         {
 
