@@ -1,6 +1,9 @@
+//NuGet path: dotnet pack --output ../nupkgs /p:NuspecFile=../IBXHelper.0.9.5.nuspec
+
 #region library references
 
 using System;
+using System.Reflection;
 using System.IO;
 using System.Text;
 using System.Globalization;
@@ -254,6 +257,18 @@ namespace InfoBlox.Automation
             }
         }
 
+
+        public static string GetVersion()
+        {
+            StringBuilder versionBuilder = new StringBuilder();
+
+            versionBuilder.AppendFormat($"IBXHelper Assembly Version: {Assembly.GetEntryAssembly().GetName().Version.ToString()}\n");
+            versionBuilder.AppendFormat($"IBXHelper File Version: {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version}\n");
+            versionBuilder.AppendFormat($"IBXHelper Assembly Informational Version: {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}\n");
+
+            return versionBuilder.ToString();
+        }
+
         Helper()
         {
             RetrieveConfigurationAsync().Wait();
@@ -368,6 +383,7 @@ namespace InfoBlox.Automation
                 }
             });
         }
+
     }
 }
 

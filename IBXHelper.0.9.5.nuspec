@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>IBXHelper</id>
+    <version>0.9.5</version>
+    <authors>Antonio Luevano (antonio@genvio.net)</authors>
+    <owners>IBXHelper</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>InfoBlox API C# Library for Azure and Dotnet core 2.1+</description>
+    <dependencies>
+      <group targetFramework=".NETCoreApp2.2">
+        <dependency id="Microsoft.Extensions.Configuration" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.FileExtensions" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Json" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="12.0.1" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="D:\Projects\KPMG\InfoBloxHelper\IBXHelper\bin\Debug\netcoreapp2.2\IBXHelper.dll" target="lib\netcoreapp2.2\IBXHelper.dll" />
+    <file src="D:\Projects\KPMG\InfoBloxHelper\IBXHelper\bin\Debug\netcoreapp2.2\Genvio.Utility.dll" target="lib\netcoreapp2.2\Genvio.Utility.dll" />
+    <file src="D:\Projects\KPMG\InfoBloxHelper\IBXHelper\bin\Debug\netcoreapp2.2\lib\appsettings.json" target="lib\netcoreapp2.2\appsettings.json" />
+  </files>
+</package>

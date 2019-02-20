@@ -12,11 +12,13 @@
     class Program
     {
 
-        private static Helper infoBloxHelper = Helper.Instance;
+        private static Helper ibxHelper = Helper.Instance;
 
         static void Main(string[] args)
         {
             Console.WriteLine("Hello InfoBlox Helper Console!");
+
+            Console.WriteLine(Helper.GetVersion());
             var nets = RetrieveNetworks().Result;
             Console.WriteLine(JsonConvert.SerializeObject(nets));
             Console.ReadLine();
@@ -33,7 +35,7 @@
         }
         public static async Task<List<InfobloxNetwork>> RetrieveNetworks()
         {
-            List<InfobloxNetwork> _lstNetworks = await infoBloxHelper.GetNetworkListsAsync();
+            List<InfobloxNetwork> _lstNetworks = await ibxHelper.GetNetworkListsAsync();
 
             return (_lstNetworks);
         }
@@ -41,14 +43,14 @@
 
         public static async Task<string> RetrieveIP()
         {
-            var _ipResult = await infoBloxHelper.GetIPAsync(5);
+            var _ipResult = await ibxHelper.GetIPAsync(5);
             return (_ipResult.ToJson());
         }
 
 
         public static async Task<string> AddNewRecord()
         {
-            var _IpHostRecord = await infoBloxHelper.CreateHostRecordAsync("newdemo-antonio.kpmg.msft.cloud");
+            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo-antonio.kpmg.msft.cloud");
             return (_IpHostRecord);
         }
     }
