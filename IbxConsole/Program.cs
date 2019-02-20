@@ -28,8 +28,12 @@
             Console.WriteLine(_ip);
             Console.ReadLine();
 
-            var recordaccept = AddNewRecord();
+            //Write a Record.
+            //Console.WriteLine(AddNewRecord());
             //Console.ReadLine();
+
+            Console.WriteLine(GetHostRecord().Result);
+            Console.ReadLine();
 
             //RetrieveIP(5).Wait();
         }
@@ -51,6 +55,12 @@
         public static async Task<string> AddNewRecord()
         {
             var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo1-antonio.kpmg.azure.cloud");
+            return (_IpHostRecord);
+        }
+
+        public static async Task<HostRecord> GetHostRecord()
+        {
+            var _IpHostRecord = await ibxHelper.GetHostRecordAsync("newdemo1-antonio.kpmg.azure.cloud");
             return (_IpHostRecord);
         }
     }
