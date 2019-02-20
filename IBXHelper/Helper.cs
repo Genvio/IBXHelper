@@ -168,9 +168,11 @@ namespace InfoBlox.Automation
             //HostRecord newHost = new HostRecord() { Name = HostName, Ipv4Addresses = new Ipv4Address[] { new Ipv4Address() { Value = Ipv4Address } } };
 
             //Multi-line model construct. Pick your poison by uncommenting the chosen method. ;-)
-            HostRecord newHost = new HostRecord();
+            HostRecordPost newHost = new HostRecordPost();
             newHost.Name = HostName;
-            newHost.Ipv4Addresses = new Ipv4Address[] { new Ipv4Address() { Value = Ipv4Address } };
+            newHost.Ipv4Addresses = new Ipv4AddressPost[] { new Ipv4AddressPost() { Value = Ipv4Address } };
+
+            //return newHost.ToJson();
 
             UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
@@ -258,8 +260,6 @@ namespace InfoBlox.Automation
                 return instance;
             }
         }
-
-
         public static string GetVersion()
         {
             StringBuilder versionBuilder = new StringBuilder();
@@ -388,6 +388,3 @@ namespace InfoBlox.Automation
 
     }
 }
-
-
-

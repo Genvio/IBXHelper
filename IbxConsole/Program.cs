@@ -50,7 +50,7 @@
 
         public static async Task<string> AddNewRecord()
         {
-            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo1-antonio.kpmg.msft.cloud");
+            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo1-antonio.kpmg.azure.cloud");
             return (_IpHostRecord);
         }
     }

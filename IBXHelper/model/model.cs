@@ -107,26 +107,45 @@ namespace InfoBlox.Automation.Model
     {
         public static IpResult FromJson(string json) => JsonConvert.DeserializeObject<IpResult>(json, Converter.Settings);
     }
-    public partial class HostRecord
+
+    public partial class HostRecordPost
     {
         [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonProperty("_ref")]
-        public string Reference { get; set; }
-
         [JsonProperty("ipv4addrs")]
-        public Ipv4Address[] Ipv4Addresses { get; set; }
-
-        [JsonProperty("view")]
-        public string View { get; set; }
+        public Ipv4AddressPost[] Ipv4Addresses { get; set; }
     }
-    public partial class HostRecord
+
+    public partial class HostRecordPost
     {
         public static HostRecord FromJson(string json) => JsonConvert.DeserializeObject<HostRecord>(json, Converter.Settings);
     }
 
-    public partial class Ipv4Address
+    public partial class HostRecord : HostRecordPost
+    {
+        [JsonProperty("ipv4addrs")]
+        new public Ipv4Address[] Ipv4Addresses { get; set; }
+
+        [JsonProperty("_ref")]
+        public string Reference { get; set; }
+
+        [JsonProperty("view")]
+        public string View { get; set; }
+    }
+
+    public partial class HostRecord
+    {
+        new public static HostRecord FromJson(string json) => JsonConvert.DeserializeObject<HostRecord>(json, Converter.Settings);
+    }
+
+    public partial class Ipv4AddressPost
+    {
+
+        [JsonProperty("ipv4addr")]
+        public string Value { get; set; }
+    }
+    public partial class Ipv4Address : Ipv4AddressPost
     {
         [JsonProperty("_ref")]
         public string Reference { get; set; }
@@ -136,9 +155,6 @@ namespace InfoBlox.Automation.Model
 
         [JsonProperty("host")]
         public string Host { get; set; }
-
-        [JsonProperty("ipv4addr")]
-        public string Value { get; set; }
     }
 
     #endregion
@@ -194,11 +210,14 @@ namespace InfoBlox.Automation.Model
     public static class Serialize
     {
         public static string ToJson(this List<InfobloxNetwork> self) => JsonConvert.SerializeObject(self, Converter.Settings);
+
         public static string ToJson(this IpResult self) => JsonConvert.SerializeObject(self, Converter.Settings);
 
         public static string ToJson(this IpRequest self) => JsonConvert.SerializeObject(self, Converter.Settings);
 
         public static string ToJson(this HostRecord self) => JsonConvert.SerializeObject(self, Converter.Settings);
+
+        public static string ToJson(this HostRecordPost self) => JsonConvert.SerializeObject(self, Converter.Settings);
 
         public static string ToJson(this Configuration self) => JsonConvert.SerializeObject(self, Converter.Settings);
     }
