@@ -19,7 +19,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Binder;
-using Genvio.Utility;
 using InfoBlox.Automation.Model;
 
 #endregion
@@ -75,7 +74,7 @@ namespace InfoBlox.Automation
 
 
             string apifunction = "network";
-            string refnetwork = "ZG5zLm5ldHdvcmskMTAuMTI4LjAuMC8yNC8w";
+            string refnetwork = "ZG5zLm5ldHdvcmskMTAuMTI4LjAuMC8yNC8w"; // TODO - Fix
             string apicommand = "_function=next_available_ip";
 
             // UriBuilder uriBuilder = new UriBuilder();
@@ -221,6 +220,10 @@ namespace InfoBlox.Automation
         private static bool isClientInitialized = false;
         private static UriBuilder uriBuilder = new UriBuilder();
 
+        private static List<InfobloxNetwork> infoBloxSubnets;
+
+        private static InfobloxNetwork defaultSubnet;
+
         //Configuration settings for the Helper
         private HelperConfiguration helperConfig;
 
@@ -228,7 +231,6 @@ namespace InfoBlox.Automation
         const int port = 443; // TLS or SSL default port. Adjust as needed.
         private static bool acceptAnySsl = false;
 
-        private static List<InfobloxNetwork> infoBloxSubnets;
 
         #endregion
 
@@ -283,13 +285,21 @@ namespace InfoBlox.Automation
             try
             {
                 infoBloxSubnets = await this.GetNetworkListsAsync();
-                //SelectDefaultSubnetAsync(infoBloxSubnets);
+                if (infoBloxSubnets.Count >= 2)
+                {
+                    SelectDefaultSubnetAsync(infoBloxSubnets);
+                }
             }
             catch (System.Exception)
             {
 
                 throw;
             }
+        }
+
+        private void SelectDefaultSubnetAsync(List<InfobloxNetwork> infoBloxSubnets)
+        {
+            throw new NotImplementedException();
         }
 
         private static async Task SslBypassCheckAsync()
@@ -342,7 +352,6 @@ namespace InfoBlox.Automation
                         configPath = Environment.GetEnvironmentVariable("HOME") + "\\site\\wwwroot\\";
                     else
                         configPath = System.Environment.CurrentDirectory;
-                    configPath += "\\lib";
 
                     var builder = new ConfigurationBuilder().SetBasePath(configPath).AddJsonFile("appsettings.json", false, true);
 
