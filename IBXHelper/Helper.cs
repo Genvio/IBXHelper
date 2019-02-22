@@ -6,6 +6,7 @@ using System;
 using System.Reflection;
 using System.IO;
 using System.Text;
+using System.Linq;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Threading;
@@ -20,6 +21,7 @@ using Newtonsoft.Json.Converters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Binder;
 using InfoBlox.Automation.Model;
+using Genvio.Utility.Network;
 
 #endregion
 
@@ -28,20 +30,20 @@ namespace InfoBlox.Automation
     public sealed partial class Helper
     {
         //InfoBlox specific options.
-        public async Task<List<InfobloxNetwork>> GetNetworkListsAsync()
+        public async Task<InfobloxNetwork> GetNetworkAsync(string cidrNetwork)
         {
 
-            // https://10.10.10.10/wapi/v2.9/network
+            // https://10.10.10.10/wapi/v2.9/network?network=10.10.10.10/8
 
             string apifunction = "network";
+            string apicommand = $"network={cidrNetwork}";
 
             // UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
             uriBuilder.Port = port;
             uriBuilder.Host = helperConfig.ServerUri;
             uriBuilder.Path = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
-
-            //  NewMethod(_acceptInvalidSSL);
+            uriBuilder.Query = apicommand;
 
             HttpRequestMessage _reqMessage = new HttpRequestMessage();
 
@@ -58,6 +60,33 @@ namespace InfoBlox.Automation
             return InfobloxNetwork.FromJson(content);
         }
 
+        public async Task<InfobloxNetworks> GetNetworkListsAsync()
+        {
+
+            // https://10.10.10.10/wapi/v2.9/network
+
+            string apifunction = "network";
+
+            uriBuilder.Scheme = scheme;
+            uriBuilder.Port = port;
+            uriBuilder.Host = helperConfig.ServerUri;
+            uriBuilder.Path = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
+
+            HttpRequestMessage _reqMessage = new HttpRequestMessage();
+
+            _reqMessage.Headers.Authorization = httpclientAuthHeaderValue;
+
+            _reqMessage.RequestUri = uriBuilder.Uri;
+            _reqMessage.Method = HttpMethod.Get;
+
+            HttpResponseMessage _httpResponse = await httpClient.SendAsync(_reqMessage);
+
+            //Get the response back
+            string content = await _httpResponse.Content.ReadAsStringAsync();
+            _httpResponse.EnsureSuccessStatusCode();
+            return InfobloxNetworks.FromJson(content);
+        }
+
         public async Task<IpResult> GetIPAsync(int totalIPRequested = 1)
         {
             return await GetIPAsync(totalIPRequested, String.Empty);
@@ -69,15 +98,13 @@ namespace InfoBlox.Automation
 
             if (totalIPRequested <= 0)
             {
-                return null;
+                return default(IpResult);
             }
 
-
             string apifunction = "network";
-            string refnetwork = "ZG5zLm5ldHdvcmskMTAuMTI4LjAuMC8yNC8w"; // TODO - Fix
+            string refnetwork = FindSubnetBaseRef(subnetIp);
             string apicommand = "_function=next_available_ip";
 
-            // UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
             uriBuilder.Port = port;
             uriBuilder.Host = helperConfig.ServerUri;
@@ -103,13 +130,14 @@ namespace InfoBlox.Automation
 
             return IpResult.FromJson(content);
         }
-        public async Task<HostRecord> GetHostRecordAsync(string HostName)
+
+        public async Task<HostRecord> GetHostRecordAsync(string HostName)  //FIX - Needs to fix returned reference object.
         {
             //https://10.10.10.10/wapi/v2.9/record:host?name~=host.url.path
 
             if (String.IsNullOrEmpty(HostName))
             {
-                return null;
+                return default(HostRecord);
             }
 
             string apifunction = "record:host";
@@ -144,12 +172,12 @@ namespace InfoBlox.Automation
         {
             if (String.IsNullOrEmpty(HostName))
             {
-                return null;
+                return default(string);
             }
 
-            IpResult nextIP = instance.GetIPAsync(1).Result;
+            IpResult nextIP = GetIPAsync(1).Result;
 
-            return instance.CreateHostRecordAsync(HostName, nextIP.IPAddresses[0], null).Result.ToString();
+            return (await CreateHostRecordAsync(HostName, nextIP.IPAddresses[0], null));
 
         }
         public async Task<string> CreateHostRecordAsync(string HostName, string Ipv4Address, string HostMac = null)
@@ -158,7 +186,7 @@ namespace InfoBlox.Automation
 
             if (String.IsNullOrEmpty(HostName) || string.IsNullOrEmpty(Ipv4Address))
             {
-                return null;
+                return default(string);
             }
 
             string apifunction = "record:host";
@@ -201,11 +229,22 @@ namespace InfoBlox.Automation
             // return IpResult.FromJson(content);
             return (content);
         }
-        public async Task UpdateHostRecordAsync()
-        { }
-        public async Task DeleteHostRecordAsync()
-        { }
-
+        public async Task<bool> UpdateHostRecordAsync(HostRecordPost host) //TODO: Implement
+        {
+            return false;
+        }
+        public async Task<bool> DeleteHostRecordAsync(HostRecordPost host)  //TODO: Implement
+        {
+            return false;
+        }
+        public async Task<bool> UpdateHostRecordAsync(string hostName)
+        {
+            return (await UpdateHostRecordAsync(new HostRecord() { Name = hostName }));
+        }
+        public async Task<bool> DeleteHostRecordAsync(string hostName)
+        {
+            return (await DeleteHostRecordAsync(new HostRecord() { Name = hostName })); ;
+        }
 
     }
 
@@ -215,22 +254,17 @@ namespace InfoBlox.Automation
         #region HttpClient instance variables
         private static HttpClient httpClient;
         private static HttpClientHandler handler = new HttpClientHandler();
-
         private static AuthenticationHeaderValue httpclientAuthHeaderValue;
         private static bool isClientInitialized = false;
         private static UriBuilder uriBuilder = new UriBuilder();
-
-        private static List<InfobloxNetwork> infoBloxSubnets;
-
-        private static InfobloxNetwork defaultSubnet;
+        private static List<InfobloxNetwork> infoBloxSubnets = new List<InfobloxNetwork>();
+        private static InfobloxNetwork defaultSubnet = new InfobloxNetwork();
 
         //Configuration settings for the Helper
         private HelperConfiguration helperConfig;
-
         const string scheme = "https"; //TLS protocol.
         const int port = 443; // TLS or SSL default port. Adjust as needed.
         private static bool acceptAnySsl = false;
-
 
         #endregion
 
@@ -238,6 +272,7 @@ namespace InfoBlox.Automation
 
         //Singleton Implementation of the Helper
         private static Helper instance = null;
+        private static Assembly assembly;
 
         //Thread Safety object to ensure thread safety.
         private static readonly object padlock = new object();
@@ -264,11 +299,14 @@ namespace InfoBlox.Automation
         }
         public static string GetVersion()
         {
+            //Reference the local assembly
+            assembly = Assembly.GetEntryAssembly();
+
             StringBuilder versionBuilder = new StringBuilder();
 
-            versionBuilder.AppendFormat($"IBXHelper Assembly Version: {Assembly.GetEntryAssembly().GetName().Version.ToString()}\n");
-            versionBuilder.AppendFormat($"IBXHelper File Version: {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version}\n");
-            versionBuilder.AppendFormat($"IBXHelper Assembly Informational Version: {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}\n");
+            versionBuilder.AppendFormat($"IBXHelper Assembly Version: {assembly.GetName().Version.ToString()}\n");
+            versionBuilder.AppendFormat($"IBXHelper File Version: {assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version}\n");
+            versionBuilder.AppendFormat($"IBXHelper Assembly Informational Version: {assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}\n");
 
             return versionBuilder.ToString();
         }
@@ -276,15 +314,14 @@ namespace InfoBlox.Automation
         Helper()
         {
             RetrieveConfigurationAsync().Wait();
-            SslBypassCheckAsync().Wait();
-            RefreshSubnetsAsync().Wait();
+            //RefreshSubnetsAsync().Wait();  //TODO: review
         }
 
         private async Task RefreshSubnetsAsync()
         {
             try
             {
-                infoBloxSubnets = await this.GetNetworkListsAsync();
+                infoBloxSubnets = await GetNetworkListsAsync();
                 if (infoBloxSubnets.Count >= 2)
                 {
                     SelectDefaultSubnetAsync(infoBloxSubnets);
@@ -362,6 +399,33 @@ namespace InfoBlox.Automation
                     CreateAutorizationContextAsync().Wait();
 
                     acceptAnySsl = helperConfig.AcceptAnySsl;
+
+                    SslBypassCheckAsync().Wait();
+
+                    infoBloxSubnets = GetNetworkListsAsync().Result;
+
+                    if (!String.IsNullOrEmpty(helperConfig.DefaultNetworkCIDR))
+                    {
+                        if (NetworkUtilities.ValidateCidrIp(helperConfig.DefaultNetworkCIDR).Value)
+                        {
+
+                            //defaultSubnet =  instance.GetNetworkAsync(helperConfig.DefaultNetworkCIDR).Result;
+                            var _subnetResult = from subnet in infoBloxSubnets
+                                                where (subnet.Network == helperConfig.DefaultNetworkCIDR)
+                                                select subnet;
+
+                            defaultSubnet = _subnetResult.FirstOrDefault();
+                        }
+                    }
+                    else
+                    {
+                        //defaultSubnet =  instance.GetNetworkAsync(helperConfig.DefaultNetworkCIDR).Result;
+                        var _subnetResult = (from subnet in infoBloxSubnets
+                                             select subnet).Take(1);
+
+                        defaultSubnet = _subnetResult.FirstOrDefault();
+                    }
+
                 });
             }
             catch (System.Exception)
@@ -393,6 +457,30 @@ namespace InfoBlox.Automation
                     throw new System.Exception();
                 }
             });
+        }
+
+        private string FindSubnetBaseRef(string subnetIp)
+        {
+            if (String.IsNullOrEmpty(subnetIp) && String.IsNullOrEmpty(defaultSubnet.Network))
+            {
+
+                throw new Exception("No default subnet in the InfoBlox server. Cannot continue. ");
+            }
+            else
+            {
+                if (String.IsNullOrEmpty(subnetIp))
+                {
+                    return defaultSubnet.BaseRef;
+                }
+                else
+                {
+                    var searchBaseRef = (from subnet in infoBloxSubnets
+                                         where (subnet.Network == subnetIp)
+                                         select subnet.BaseRef).FirstOrDefault();
+                    return searchBaseRef;
+                }
+            }
+
         }
 
     }

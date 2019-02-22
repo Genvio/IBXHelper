@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include=".\lib\appsettings.json">
+    <None Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
