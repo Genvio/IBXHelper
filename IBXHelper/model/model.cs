@@ -73,7 +73,6 @@ namespace InfoBlox.Automation.Model
     {
         public static InfobloxNetworks FromJson(string json) => JsonConvert.DeserializeObject<InfobloxNetworks>(json, Converter.Settings); //TODO - change here
     }
-
     public partial class IpRequest
     {
         private int number;
@@ -137,6 +136,12 @@ namespace InfoBlox.Automation.Model
     {
         new public static HostRecord FromJson(string json) => JsonConvert.DeserializeObject<HostRecord>(json, Converter.Settings); //TODO: Fix the Deserialization of IP addresses.
     }
+
+    public partial class HostRecords : List<HostRecord>
+    {
+        public static HostRecords FromJson(string json) => JsonConvert.DeserializeObject<HostRecords>(json, Converter.Settings);
+    }
+
     public partial class Ipv4AddressPost
     {
 

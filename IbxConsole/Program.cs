@@ -29,10 +29,10 @@
             Console.ReadLine();
 
             //Write a Record.
-            //Console.WriteLine(AddNewRecord());
-            //Console.ReadLine();
+            Console.WriteLine(JsonConvert.SerializeObject(AddNewRecord()));
+            Console.ReadLine();
 
-            Console.WriteLine(GetHostRecord().Result);
+            Console.WriteLine(JsonConvert.SerializeObject(GetHostRecord()));
             Console.ReadLine();
 
             //RetrieveIP(5).Wait();
@@ -52,15 +52,15 @@
         }
 
 
-        public static async Task<string> AddNewRecord()
+        public static async Task<HostRecord> AddNewRecord()
         {
-            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo1-antonio.kpmg.azure.cloud");
+            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo2-antonio.kpmg.azure.cloud");
             return (_IpHostRecord);
         }
 
         public static async Task<HostRecord> GetHostRecord()
         {
-            var _IpHostRecord = await ibxHelper.GetHostRecordAsync("newdemo1-antonio.kpmg.azure.cloud");
+            var _IpHostRecord = await ibxHelper.GetHostRecordAsync("newdemo2-antonio.kpmg.azure.cloud");
             return (_IpHostRecord);
         }
     }
