@@ -17,8 +17,21 @@ namespace InfoBlox.Automation.Model
 {
     public partial class Ipv4Address : Ipv4AddressPost
     {
+        private string refIpv4Address;
+
         [JsonProperty("_ref")]
-        public string Reference { get; set; }
+        public string Reference
+        {
+            get
+            {
+                return refIpv4Address;
+            }
+            set
+            {
+                refIpv4Address = value;
+                ExtractBaseRef();
+            }
+        }
 
         [JsonProperty("configure_for_dhcp")]
         public bool ConfigureForDhcp { get; set; }
@@ -26,4 +39,29 @@ namespace InfoBlox.Automation.Model
         [JsonProperty("host")]
         public string Host { get; set; }
     }
+
+    public partial class Ipv4Address : Ipv4AddressPost
+    {
+
+        private string baseRef;
+        public string BaseRef
+        {
+            get
+            {
+                return baseRef;
+            }
+        }
+        private void ExtractBaseRef()
+        {
+            int _startExtract = refIpv4Address.IndexOf("/", 0);
+
+            int _endExtract = refIpv4Address.IndexOf(":", _startExtract);
+
+            if (refIpv4Address.Length > 0 && _startExtract >= 1 && _endExtract >= 0)
+            {
+                baseRef = refIpv4Address.Substring(_startExtract + 1, ((_endExtract - _startExtract) - 1));
+            }
+        }
+    }
+
 }

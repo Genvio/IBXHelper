@@ -16,31 +16,71 @@
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello InfoBlox Helper Console!");
+            Console.WriteLine("Welcome InfoBlox Helper Test Console");
 
             Console.WriteLine(Helper.GetVersion());
             var nets = RetrieveNetworks().Result;
             Console.WriteLine(JsonConvert.SerializeObject(nets));
-            Console.ReadLine();
+            Console.ReadKey();
 
             //RetrieveIP().Wait();
             var _ip = RetrieveIP().Result;
             Console.WriteLine(_ip);
-            Console.ReadLine();
+            Console.ReadKey();
 
-            Console.Write("Please enter a name for the host to be created:");
-            string hostname = $"{Console.ReadLine()}.kpmg.azure.cloud";
+            Console.Write("Please enter a name for the host to be created: -> ");
+            Console.WriteLine();
+            string _hostname = $"{Console.ReadLine()}.kpmg.azure.cloud";
 
             //Write a Record.
-            HostRecord newRecord = AddNewRecord(hostname).Result;
+            HostRecord _newRecord = AddNewRecord(_hostname).Result;
 
-            Console.WriteLine(JsonConvert.SerializeObject(newRecord));
-            Console.ReadLine();
+            Console.WriteLine(JsonConvert.SerializeObject(_newRecord));
+            Console.ReadKey();
 
-            HostRecord retrieveRecord = GetHostRecord(hostname).Result;
+            //Read a host record.
+            HostRecord _retrieveRecord = GetHostRecord(_hostname).Result;
 
-            Console.WriteLine(JsonConvert.SerializeObject(retrieveRecord));
-            Console.ReadLine();
+            Console.WriteLine(JsonConvert.SerializeObject(_retrieveRecord));
+            Console.ReadKey();
+
+            //Search a host record by IP address.
+            string _ipv4ToSearch = _retrieveRecord.Ipv4Addresses[0].Value;
+
+            HostRecord _retrieveIpRecord = GetHostByIP(_ipv4ToSearch).Result;
+
+            Console.WriteLine(JsonConvert.SerializeObject(_retrieveRecord));
+            Console.ReadKey();
+
+            //Update the host record with a new IP address.
+            string _ipv4ToUpdate = ibxHelper.GetIPAsync(1).Result.IPAddresses[0];
+
+            HostRecordPost _recordToChange = new HostRecordPost()
+            {
+                Name = _retrieveIpRecord.Name,
+                Ipv4Addresses = new Ipv4AddressPost[] { new Ipv4AddressPost() { Value = _ipv4ToUpdate } }
+            };
+
+            HostRecord _updatedRecord = ibxHelper.UpdateHostRecordAsync(_retrieveIpRecord.Name, _recordToChange).Result;
+
+            Console.WriteLine(JsonConvert.SerializeObject(_updatedRecord));
+            Console.ReadKey();
+
+            //Delete the host record
+            bool _isRecordDeleted = ibxHelper.DeleteHostRecordAsync(_recordToChange).Result;
+
+            Console.WriteLine(JsonConvert.SerializeObject(_isRecordDeleted));
+            Console.ReadKey();
+
+            //Delete a record that has already been removed (deleted).
+            _isRecordDeleted = ibxHelper.DeleteHostRecordAsync(_recordToChange).Result;
+
+            Console.WriteLine(JsonConvert.SerializeObject(_isRecordDeleted));
+            Console.ReadKey();
+
+            Console.WriteLine("InfoBlox Helper Test Completed. Press any key to end.");
+            Console.ReadKey();
+
         }
 
         public static async Task<List<InfobloxNetwork>> RetrieveNetworks()
@@ -66,6 +106,12 @@
         public static async Task<HostRecord> GetHostRecord(string hostname)
         {
             var _IpHostRecord = await ibxHelper.GetHostRecordAsync(hostname);
+            return (_IpHostRecord);
+        }
+
+        public static async Task<HostRecord> GetHostByIP(string Ipv4Address)
+        {
+            var _IpHostRecord = await ibxHelper.GetHostRecordByIPAddressAsync(Ipv4Address);
             return (_IpHostRecord);
         }
     }

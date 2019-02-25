@@ -44,7 +44,7 @@ namespace InfoBlox.Automation.Model
     public partial class InfobloxNetwork
     {
         private string baseRef;
-        public static InfobloxNetwork FromJson(string json) => JsonConvert.DeserializeObject<InfobloxNetwork>(json, Converter.Settings); //TODO - change here
+        public static InfobloxNetwork FromJson(string json) => JsonConvert.DeserializeObject<InfobloxNetwork>(json, Converter.Settings);
         public string BaseRef
         {
             get
@@ -68,7 +68,7 @@ namespace InfoBlox.Automation.Model
     }
     public partial class InfobloxNetworks : List<InfobloxNetwork>
     {
-        public static InfobloxNetworks FromJson(string json) => JsonConvert.DeserializeObject<InfobloxNetworks>(json, Converter.Settings); //TODO - change here
+        public static InfobloxNetworks FromJson(string json) => JsonConvert.DeserializeObject<InfobloxNetworks>(json, Converter.Settings);
     }
 
     #endregion

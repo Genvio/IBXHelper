@@ -22,6 +22,7 @@ namespace InfoBlox.Automation.Model
     //Serialization and Deserialization components.
     public static class Serialize
     {
+        public static string ToJson(this IPSearchResults self) => JsonConvert.SerializeObject(self, Converter.Settings);
         public static string ToJson(this InfobloxNetworks self) => JsonConvert.SerializeObject(self, Converter.Settings);
         public static string ToJson(this InfobloxNetwork self) => JsonConvert.SerializeObject(self, Converter.Settings);
         public static string ToJson(this IpResult self) => JsonConvert.SerializeObject(self, Converter.Settings);

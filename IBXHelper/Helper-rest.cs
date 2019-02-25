@@ -83,7 +83,7 @@ namespace InfoBlox.Automation
 
             return IpResult.FromJson(content);
         }
-        public async Task<HostRecord> GetHostRecordAsync(string HostName)  //FIX - Needs to fix returned reference object.
+        public async Task<HostRecord> GetHostRecordAsync(string HostName)
         {
             //https://10.10.10.10/wapi/v2.9/record:host?name~=host.url.path
 
@@ -104,6 +104,44 @@ namespace InfoBlox.Automation
                                select record).FirstOrDefault();
             return (host);
 
+        }
+        public async Task<HostRecord> GetHostRecordByIPAddressAsync(string Ipv4Address)
+        {
+            //https://10.10.10.10/wapi/v2.9/ipv4address?status=USED&ip_address=10.10.10.10
+
+            HostRecord createdHostRecord = new HostRecord();
+
+            if (!String.IsNullOrEmpty(Ipv4Address))
+            {
+                // Check#2 - Validate the ipV4 address sent is a valid IP address
+                if ((NetworkUtilities.ParseSingleIPv4Address(Ipv4Address).Value.ToString()) != Ipv4Address)
+                {
+                    throw new ArgumentException($"The value of {Ipv4Address} is invalid. Check your values and try again.");
+                }
+                // Check#3 - Validate the ipV4 address is in one of the managed Ip Subnets in the InfoBlox API
+                if (!IsIpv4AddressInSubnetsRange(Ipv4Address))
+                {
+                    throw new ArgumentException($"The value of {Ipv4Address} is not within the range of the subnets managed by the InfoBlox Grid. Check your values and try again.");
+                }
+
+                string apifunction = "ipv4address";
+                string apicommand = $"status=USED&ip_address={Ipv4Address}";
+                string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
+
+                string content = await IBXCallApi(HttpMethod: HttpMethod.Get, ApiFunction: apifunction, ApiPath: apipath, ApiCommand: apicommand);
+
+                var returnedSearchResults = IPSearchResults.FromJson(content);
+
+                if (returnedSearchResults.Count > 0)
+                {
+                    string hostname = (from item in returnedSearchResults
+                                       select item.Names[0]).FirstOrDefault();
+
+                    createdHostRecord = await GetHostRecordAsync(hostname);
+                }
+            }
+
+            return (createdHostRecord);
         }
 
         //Function to call when the library will automatically fetch the next IP Address and pass the value of the hostname
@@ -181,24 +219,88 @@ namespace InfoBlox.Automation
 
             return (createdHostRecord);
         }
-        public async Task<bool> UpdateHostRecordAsync(HostRecordPost host) //TODO: Implement
+        public async Task<HostRecord> UpdateHostRecordAsync(string HostName, HostRecordPost changedRecord)
         {
-            return false;
+            // https://10.10.10.10/wapi/v2.9/record:host
+
+            //Validations (4)
+            // This area perform validations to the information provided to the function.
+            // Check#1 - Validate input to ensure that thereis a hostname and Host object to update
+            if (String.IsNullOrEmpty(HostName) || (changedRecord is null))
+            {
+                return default(HostRecord);
+            }
+            // Check#2 - Ensure that the host is already in the DNS registry
+            var hostAlreadyExists = await GetHostRecordAsync(HostName);
+
+            if (hostAlreadyExists is null)
+            {
+                throw new ArgumentException($"The hostname  {HostName} is does not exist in the server or is invalid. Check your values and try again.");
+            }
+            // Check#3 - Validate the ipV4 address sent is a valid IP address
+            string ipv4AddressToValidate = changedRecord.Ipv4Addresses[0].Value;
+
+            if ((NetworkUtilities.ParseSingleIPv4Address(ipv4AddressToValidate).Value.ToString()) != ipv4AddressToValidate)
+            {
+                throw new ArgumentException($"The value of {ipv4AddressToValidate} is invalid. Check your values and try again.");
+            }
+            // Check#4 - Validate the ipV4 address is in one of the managed Ip Subnets in the InfoBlox API
+            if (!IsIpv4AddressInSubnetsRange(ipv4AddressToValidate))
+            {
+                throw new ArgumentException($"The value of {ipv4AddressToValidate} is not within the range of the subnets managed by the InfoBlox Grid. Check your values and try again.");
+            }
+
+            //If everything is good so far... let's go ahead and prepare the info for the HostRecord!
+
+
+            string apifunction = "record:host";
+            string refhost = hostAlreadyExists.BaseRef;
+            string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}/{refhost}";
+            string requestcontent = changedRecord.ToJson();
+
+            string content = await IBXCallApi(HttpMethod: HttpMethod.Put, ApiFunction: apifunction, ApiPath: apipath, RequestContent: requestcontent);
+
+            HostRecord createdHostRecord = await GetHostRecordAsync(changedRecord.Name);
+
+            return (createdHostRecord);
         }
-        public async Task<bool> DeleteHostRecordAsync(HostRecordPost host)  //TODO: Implement
+        public async Task<bool> DeleteHostRecordAsync(HostRecordPost hostToDelete)
         {
-            return false;
-        }
-        public async Task<bool> UpdateHostRecordAsync(string hostName)
-        {
-            return (await UpdateHostRecordAsync(new HostRecord() { Name = hostName }));
+            //Validations (3)
+            // This area perform validations to the information provided to the function.
+            // Check#1 - Validate input to ensure that there is a host object to delete
+            if (hostToDelete is null)
+            {
+                return false;
+            }
+            // Check#2 - Ensure that the host is already in the DNS registry
+            var existingHost = await GetHostRecordAsync(hostToDelete.Name);
+
+            if (existingHost is null)
+            {
+                throw new ArgumentException($"The host {hostToDelete.Name} is does not exist in the server or is invalid. Check your values and try again.");
+            }
+            // Check#3 - Validate the existing host has a valid Base Reference
+            string baseReferenceToValidate = existingHost.BaseRef;
+
+            if (String.IsNullOrEmpty(baseReferenceToValidate))
+            {
+                throw new ArgumentOutOfRangeException($"The record doesn't have a valid Base Reference or doesn't exists. Check your values and try again.");
+            }
+
+            //If everything is good so far... let's go ahead and prepare the info for the HostRecord!
+
+            string apifunction = "record:host";
+            string refhost = existingHost.BaseRef;
+            string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}/{refhost}";
+
+            string content = await IBXCallApi(HttpMethod: HttpMethod.Delete, ApiFunction: apifunction, ApiPath: apipath);
+
+            return (!String.IsNullOrEmpty(content));
         }
         public async Task<bool> DeleteHostRecordAsync(string hostName)
         {
-            return (await DeleteHostRecordAsync(new HostRecord() { Name = hostName })); ;
+            return (await DeleteHostRecordAsync(new HostRecordPost() { Name = hostName })); ;
         }
-
     }
-
-
 }

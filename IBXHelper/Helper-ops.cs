@@ -98,7 +98,6 @@ namespace InfoBlox.Automation
         Helper()
         {
             RetrieveConfigurationAsync().Wait();
-            //RefreshSubnetsAsync().Wait();  //TODO: review
         }
         private async Task<string> IBXCallApi(HttpMethod HttpMethod, string ApiFunction, string ApiPath, string ApiCommand = "", string RequestContent = "")
         {
