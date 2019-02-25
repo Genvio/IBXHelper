@@ -30,7 +30,7 @@
 
             Console.Write("Please enter a name for the host to be created: -> ");
             Console.WriteLine();
-            string _hostname = $"{Console.ReadLine()}.kpmg.azure.cloud";
+            string _hostname = $"{Console.ReadLine()}.url.goes.here";
 
             //Write a Record.
             HostRecord _newRecord = AddNewRecord(_hostname).Result;
