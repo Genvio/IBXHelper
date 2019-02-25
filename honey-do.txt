@@ -1,0 +1,9 @@
+//How to build the Nuget Package: NuGet path: dotnet pack --output ../nupkgs /p:NuspecFile=../IBXHelper.0.9.5.nuspec
+
+//DONE: IP Array in the GetHostRecord
+//DONE: HostRecord deserialize/serialize issues.
+//TODO: Reload configuration settings (low)
+//REFACTOR: Modify the Methods to return Genvio.Utility.Results.Result instead of type specific
+//REFACTOR: Modify the Methods to use Generic and result generic
+//DONE: Preparation of the HttpClient to be done in an internal function vs. repeated object (DRY factor)
+//DONE: Parse the IP received to identify the subnet and the BaseRef in Create or Update Host.

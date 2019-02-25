@@ -1,0 +1,23 @@
+/
+// Summary:
+//     Creates a cancelable continuation that executes asynchronously when the target
+//     System.Threading.Tasks.Task`1 completes.
+//
+// Parameters:
+//   continuationAction:
+//     An action to run when the System.Threading.Tasks.Task`1 completes. When run,
+//     the delegate is passed the completed task as an argument.
+//
+//   cancellationToken:
+//     The cancellation token that is passed to the new continuation task.
+//
+// Returns:
+//     A new continuation task.
+//
+// Exceptions:
+//   T:System.ObjectDisposedException:
+//     The System.Threading.Tasks.Task`1 has been disposed. -or- The System.Threading.CancellationTokenSource
+//     that created cancellationToken has been disposed.
+//
+//   T:System.ArgumentNullException:
+//     The continuationAction argument is null.

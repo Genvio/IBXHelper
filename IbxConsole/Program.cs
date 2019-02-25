@@ -28,22 +28,21 @@
             Console.WriteLine(_ip);
             Console.ReadLine();
 
-            //Write a Record.
-            HostRecord newRecord = AddNewRecord().Result;
+            Console.Write("Please enter a name for the host to be created:");
+            string hostname = $"{Console.ReadLine()}.kpmg.azure.cloud";
 
+            //Write a Record.
+            HostRecord newRecord = AddNewRecord(hostname).Result;
 
             Console.WriteLine(JsonConvert.SerializeObject(newRecord));
             Console.ReadLine();
 
-            Console.WriteLine(JsonConvert.SerializeObject(GetHostRecord(), new JsonSerializerSettings()
-            {
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                Formatting = Formatting.Indented
-            }));
-            Console.ReadLine();
+            HostRecord retrieveRecord = GetHostRecord(hostname).Result;
 
-            //RetrieveIP(5).Wait();
+            Console.WriteLine(JsonConvert.SerializeObject(retrieveRecord));
+            Console.ReadLine();
         }
+
         public static async Task<List<InfobloxNetwork>> RetrieveNetworks()
         {
             List<InfobloxNetwork> _lstNetworks = await ibxHelper.GetNetworkListsAsync();
@@ -58,15 +57,15 @@
         }
 
 
-        public static async Task<HostRecord> AddNewRecord()
+        public static async Task<HostRecord> AddNewRecord(string hostname)
         {
-            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo1.kpmg.azure.cloud");
+            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync(hostname);
             return (_IpHostRecord);
         }
 
-        public static async Task<HostRecord> GetHostRecord()
+        public static async Task<HostRecord> GetHostRecord(string hostname)
         {
-            var _IpHostRecord = await ibxHelper.GetHostRecordAsync("newdemo1.kpmg.azure.cloud");
+            var _IpHostRecord = await ibxHelper.GetHostRecordAsync(hostname);
             return (_IpHostRecord);
         }
     }

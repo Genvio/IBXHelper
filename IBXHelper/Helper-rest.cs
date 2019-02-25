@@ -109,9 +109,18 @@ namespace InfoBlox.Automation
         //Function to call when the library will automatically fetch the next IP Address and pass the value of the hostname
         public async Task<HostRecord> CreateHostRecordAsync(string HostName, string HostMac = null)
         {
+            //Validations(2)
+            // Check#1 - Validate input to ensure that a hostname was supplied
             if (String.IsNullOrEmpty(HostName))
             {
                 return default(HostRecord);
+            }
+            // Check#2 - Ensure that the host is not already in the DNS registry
+            var hostAlreadyExists = await GetHostRecordAsync(HostName);
+
+            if (hostAlreadyExists != null)
+            {
+                return hostAlreadyExists; //record for that hostname already exists, return the existing record
             }
 
             IpResult nextIP = GetIPAsync(1).Result;
@@ -131,16 +140,13 @@ namespace InfoBlox.Automation
                 return default(HostRecord);
             }
             // Check#2 - Ensure that the host is not already in the DNS registry
-            /*
-             var hostAlreadyExists = await GetHostRecordAsync(HostName);
 
-             if (hostAlreadyExists != null)
-             {
-                 return hostAlreadyExists;
-             }
+            var hostAlreadyExists = await GetHostRecordAsync(HostName);
 
-             */
-
+            if (hostAlreadyExists != null)
+            {
+                return hostAlreadyExists; //record for that hostname already exists, return the existing record
+            }
             // Check#3 - Validate the ipV4 address sent is a valid IP address
             if ((NetworkUtilities.ParseSingleIPv4Address(Ipv4Address).Value.ToString()) != Ipv4Address)
             {
@@ -196,39 +202,3 @@ namespace InfoBlox.Automation
 
 
 }
-
-//How to build the Nuget Package: NuGet path: dotnet pack --output ../nupkgs /p:NuspecFile=../IBXHelper.0.9.5.nuspec
-
-//DONE: IP Array in the GetHostRecord
-//DONE: HostRecord deserialize/serialize issues.
-//TODO: Reload configuration settings (low)
-//REFACTOR: Modify the Methods to return Genvio.Utility.Results.Result instead of type specific
-//REFACTOR: Modify the Methods to use Generic and result generic
-//DONE: Preparation of the HttpClient to be done in an internal function vs. repeated object (DRY factor)
-//DONE: Parse the IP received to identify the subnet and the BaseRef in Create or Update Host.
-
-
-//
-// Summary:
-//     Creates a cancelable continuation that executes asynchronously when the target
-//     System.Threading.Tasks.Task`1 completes.
-//
-// Parameters:
-//   continuationAction:
-//     An action to run when the System.Threading.Tasks.Task`1 completes. When run,
-//     the delegate is passed the completed task as an argument.
-//
-//   cancellationToken:
-//     The cancellation token that is passed to the new continuation task.
-//
-// Returns:
-//     A new continuation task.
-//
-// Exceptions:
-//   T:System.ObjectDisposedException:
-//     The System.Threading.Tasks.Task`1 has been disposed. -or- The System.Threading.CancellationTokenSource
-//     that created cancellationToken has been disposed.
-//
-//   T:System.ArgumentNullException:
-//     The continuationAction argument is null.
-
