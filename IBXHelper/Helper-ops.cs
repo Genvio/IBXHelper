@@ -33,163 +33,6 @@ using Genvio.Utility.Network;
 
 namespace InfoBlox.Automation
 {
-    public sealed partial class Helper
-    {
-        //InfoBlox specific options.
-        public async Task<InfobloxNetwork> GetNetworkAsync(string cidrNetwork)
-        {
-
-            // https://10.10.10.10/wapi/v2.9/network?network=10.10.10.10/8
-
-            string apifunction = "network";
-            string apicommand = $"network={cidrNetwork}";
-            string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
-            string content = await IBXCallApi(HttpMethod.Get, apifunction, apipath, apicommand);
-
-            return InfobloxNetwork.FromJson(content);
-        }
-        public async Task<InfobloxNetworks> GetNetworkListsAsync()
-        {
-
-            // https://10.10.10.10/wapi/v2.9/network
-
-            string apifunction = "network";
-            string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
-
-            string content = await IBXCallApi(HttpMethod.Get, apifunction, apipath);
-            return InfobloxNetworks.FromJson(content);
-        }
-        public async Task<IpResult> GetIPAsync(int totalIPRequested = 1)
-        {
-            return await GetIPAsync(totalIPRequested, String.Empty);
-        }
-        public async Task<IpResult> GetIPAsync(int totalIPRequested = 1, string subnetIp = "")
-        {
-            // https://10.10.10.10/wapi/v2.9/network/ZG5zLm5ldHdvcmskMTAuMTI4LjAuMC8yNC8w?_function=next_available_ip
-
-            if (totalIPRequested <= 0)
-            {
-                return default(IpResult);
-            }
-
-            string apifunction = "network";
-            string refnetwork = FindSubnetBaseRef(subnetIp);
-            string apicommand = "_function=next_available_ip";
-            string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}/{refnetwork}";
-
-            string iprequested = new IpRequest(totalIPRequested).ToJson();
-
-            string content = await IBXCallApi(HttpMethod: HttpMethod.Post, ApiFunction: apifunction, ApiPath: apipath, ApiCommand: apicommand, RequestContent: iprequested);
-
-            return IpResult.FromJson(content);
-        }
-        public async Task<HostRecord> GetHostRecordAsync(string HostName)  //FIX - Needs to fix returned reference object.
-        {
-            //https://10.10.10.10/wapi/v2.9/record:host?name~=host.url.path
-
-            if (String.IsNullOrEmpty(HostName))
-            {
-                return default(HostRecord);
-            }
-
-            string apifunction = "record:host";
-            string apicommand = $"name~={HostName}";
-            string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
-
-            string content = await IBXCallApi(HttpMethod: HttpMethod.Get, ApiFunction: apifunction, ApiPath: apipath, ApiCommand: apicommand);
-
-            var returnedHost = HostRecords.FromJson(content);
-
-            HostRecord host = (from record in returnedHost
-                               select record).FirstOrDefault();
-            return (host);
-
-        }
-
-        //Function to call when the library will automatically fetch the next IP Address and pass the value of the hostname
-        public async Task<HostRecord> CreateHostRecordAsync(string HostName, string HostMac = null)
-        {
-            if (String.IsNullOrEmpty(HostName))
-            {
-                return default(HostRecord);
-            }
-
-            IpResult nextIP = GetIPAsync(1).Result;
-
-            return (await CreateHostRecordAsync(HostName, nextIP.IPAddresses[0], null));
-
-        }
-        public async Task<HostRecord> CreateHostRecordAsync(string HostName, string Ipv4Address, string HostMac = null)
-        {
-            // https://10.10.10.10/wapi/v2.9/record:host
-
-            //Validations (4)
-            // This area perform validations to the information provided to the function.
-            // Check#1 - Validate input to ensure that thereis a hostname and an Ipv4Address
-            if (String.IsNullOrEmpty(HostName) || string.IsNullOrEmpty(Ipv4Address))
-            {
-                return default(HostRecord);
-            }
-            // Check#2 - Ensure that the host is not already in the DNS registry
-            var hostAlreadyExists = await GetHostRecordAsync(HostName);
-
-            if (hostAlreadyExists != null)
-            {
-                return hostAlreadyExists;
-            }
-            // Check#3 - Validate the ipV4 address sent is a valid IP address
-            if ((NetworkUtilities.ParseSingleIPv4Address(Ipv4Address).Value.ToString()) != Ipv4Address)
-            {
-                throw new ArgumentException($"The value of {Ipv4Address} is invalid. Check your values and try again.");
-            }
-            // Check#4 - Validate the ipV4 address is in one of the managed Ip Subnets in the InfoBlox API
-            if (!IsIpv4AddressInSubnetsRange(Ipv4Address))
-            {
-                throw new ArgumentException($"The value of {Ipv4Address} is not within the range of the subnets managed by the InfoBlox Grid. Check your values and try again.");
-            }
-
-            //If everything is good so far... let's go ahead and make us a HostRecord!
-
-            //Add spices to the recipe
-
-            //Single line model construct. Pick your poison by uncommenting the chosen method. ;-)
-            //HostRecord newHost = new HostRecord() { Name = HostName, Ipv4Addresses = new Ipv4Address[] { new Ipv4Address() { Value = Ipv4Address } } };
-
-            //Multi-line model construct. Pick your poison by uncommenting the chosen method. ;-)
-            HostRecordPost newHost = new HostRecordPost();
-            newHost.Name = HostName;
-            newHost.Ipv4Addresses = new Ipv4AddressPost[] { new Ipv4AddressPost() { Value = Ipv4Address } };
-
-            //return newHost.ToJson();
-            string apifunction = "record:host";
-            string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
-            string requestcontent = newHost.ToJson();
-
-            string content = await IBXCallApi(HttpMethod: HttpMethod.Post, ApiFunction: apifunction, ApiPath: apipath, RequestContent: requestcontent);
-
-            HostRecord createdHostRecord = await GetHostRecordAsync(HostName);
-
-            return (createdHostRecord);
-        }
-        public async Task<bool> UpdateHostRecordAsync(HostRecordPost host) //TODO: Implement
-        {
-            return false;
-        }
-        public async Task<bool> DeleteHostRecordAsync(HostRecordPost host)  //TODO: Implement
-        {
-            return false;
-        }
-        public async Task<bool> UpdateHostRecordAsync(string hostName)
-        {
-            return (await UpdateHostRecordAsync(new HostRecord() { Name = hostName }));
-        }
-        public async Task<bool> DeleteHostRecordAsync(string hostName)
-        {
-            return (await DeleteHostRecordAsync(new HostRecord() { Name = hostName })); ;
-        }
-
-    }
-
     //All non-InfoBlox members go here (configuration, httpClient, Singleton)
     public sealed partial class Helper
     {
@@ -198,7 +41,6 @@ namespace InfoBlox.Automation
         private static HttpClientHandler handler = new HttpClientHandler();
         private static AuthenticationHeaderValue httpclientAuthHeaderValue;
         private static bool isClientInitialized = false;
-        private static UriBuilder uriBuilder = new UriBuilder();
         private static List<InfobloxNetwork> infoBloxSubnets = new List<InfobloxNetwork>();
         private static InfobloxNetwork defaultSubnet = new InfobloxNetwork();
 
@@ -261,7 +103,8 @@ namespace InfoBlox.Automation
         private async Task<string> IBXCallApi(HttpMethod HttpMethod, string ApiFunction, string ApiPath, string ApiCommand = "", string RequestContent = "")
         {
 
-            // UriBuilder uriBuilder = new UriBuilder();
+
+            UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = scheme;
             uriBuilder.Port = port;
             uriBuilder.Host = helperConfig.ServerUri;
@@ -463,16 +306,6 @@ namespace InfoBlox.Automation
     }
 }
 
-//How to build the Nuget Package: NuGet path: dotnet pack --output ../nupkgs /p:NuspecFile=../IBXHelper.0.9.5.nuspec
-
-//DONE: IP Array in the GetHostRecord
-//DONE: HostRecord deserialize/serialize issues.
-//TODO: Reload configuration settings (low)
-//REFACTOR: Modify the Methods to return Genvio.Utility.Results.Result instead of type specific
-//REFACTOR: Modify the Methods to use Generic and result generic
-//DONE: Preparation of the HttpClient to be done in an internal function vs. repeated object (DRY factor)
-//DONE: Parse the IP received to identify the subnet and the BaseRef in Create or Update Host.
-
 
 //
 // Summary:
@@ -497,4 +330,3 @@ namespace InfoBlox.Automation
 //
 //   T:System.ArgumentNullException:
 //     The continuationAction argument is null.
-

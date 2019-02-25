@@ -29,10 +29,17 @@
             Console.ReadLine();
 
             //Write a Record.
-            Console.WriteLine(JsonConvert.SerializeObject(AddNewRecord()));
+            HostRecord newRecord = AddNewRecord().Result;
+
+
+            Console.WriteLine(JsonConvert.SerializeObject(newRecord));
             Console.ReadLine();
 
-            Console.WriteLine(JsonConvert.SerializeObject(GetHostRecord()));
+            Console.WriteLine(JsonConvert.SerializeObject(GetHostRecord(), new JsonSerializerSettings()
+            {
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                Formatting = Formatting.Indented
+            }));
             Console.ReadLine();
 
             //RetrieveIP(5).Wait();
@@ -44,7 +51,6 @@
             return (_lstNetworks);
         }
 
-
         public static async Task<string> RetrieveIP()
         {
             var _ipResult = await ibxHelper.GetIPAsync(5);
@@ -54,13 +60,13 @@
 
         public static async Task<HostRecord> AddNewRecord()
         {
-            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo2-antonio.kpmg.azure.cloud");
+            var _IpHostRecord = await ibxHelper.CreateHostRecordAsync("newdemo1.kpmg.azure.cloud");
             return (_IpHostRecord);
         }
 
         public static async Task<HostRecord> GetHostRecord()
         {
-            var _IpHostRecord = await ibxHelper.GetHostRecordAsync("newdemo2-antonio.kpmg.azure.cloud");
+            var _IpHostRecord = await ibxHelper.GetHostRecordAsync("newdemo1.kpmg.azure.cloud");
             return (_IpHostRecord);
         }
     }
