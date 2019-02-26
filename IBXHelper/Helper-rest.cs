@@ -46,7 +46,10 @@ namespace InfoBlox.Automation
             string apipath = $"{helperConfig.ApiRoute}/{helperConfig.ApiVersion}/{apifunction}";
             string content = await IBXCallApi(HttpMethod.Get, apifunction, apipath, apicommand);
 
-            return InfobloxNetwork.FromJson(content);
+            InfobloxNetwork _subnet = (from subnet in (InfobloxNetworks.FromJson(content))
+                                       select subnet).FirstOrDefault();
+
+            return _subnet;
         }
         public async Task<InfobloxNetworks> GetNetworkListsAsync()
         {

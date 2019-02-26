@@ -19,8 +19,12 @@
             Console.WriteLine("Welcome InfoBlox Helper Test Console");
 
             Console.WriteLine(Helper.GetVersion());
-            var nets = RetrieveNetworks().Result;
-            Console.WriteLine(JsonConvert.SerializeObject(nets));
+            var _nets = RetrieveNetworks().Result;
+            Console.WriteLine(JsonConvert.SerializeObject(_nets));
+            Console.ReadKey();
+
+            var _subnet = ibxHelper.GetNetworkAsync("10.128.0.0/24").Result;
+            Console.WriteLine(JsonConvert.SerializeObject(_subnet));
             Console.ReadKey();
 
             //RetrieveIP().Wait();

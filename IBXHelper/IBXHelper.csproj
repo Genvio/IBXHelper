@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyVersion>1.50.2</AssemblyVersion>
-    <FileVersion>1.50.2</FileVersion>
-    <Version>1.50.2</Version>
+    <AssemblyVersion>1.50.25</AssemblyVersion>
+    <FileVersion>1.50.25</FileVersion>
+    <Version>1.50.25</Version>
     <Company>Genvio Inc.</Company>
     <Authors>Antonio Luevano</Authors>
     <PackageProjectUrl></PackageProjectUrl>
@@ -37,12 +37,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Genvio.Utility" Version="1.10.9" />
+    <PackageReference Include="Genvio.Utility" Version="1.10.15" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
 </Project>
