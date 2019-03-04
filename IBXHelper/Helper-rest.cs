@@ -156,13 +156,6 @@ namespace InfoBlox.Automation
             {
                 return default(HostRecord);
             }
-            // Check#2 - Ensure that the host is not already in the DNS registry
-            var hostAlreadyExists = await GetHostRecordAsync(HostName);
-
-            if (hostAlreadyExists != null)
-            {
-                return hostAlreadyExists; //record for that hostname already exists, return the existing record
-            }
 
             IpResult nextIP = GetIPAsync(1).Result;
 

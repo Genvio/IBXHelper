@@ -22,14 +22,14 @@ namespace InfoBlox.Automation.Model
     //Serialization and Deserialization components.
     public static class Serialize
     {
-        public static string ToJson(this IPSearchResults self) => JsonConvert.SerializeObject(self, Converter.Settings);
-        public static string ToJson(this InfobloxNetworks self) => JsonConvert.SerializeObject(self, Converter.Settings);
-        public static string ToJson(this InfobloxNetwork self) => JsonConvert.SerializeObject(self, Converter.Settings);
-        public static string ToJson(this IpResult self) => JsonConvert.SerializeObject(self, Converter.Settings);
-        public static string ToJson(this IpRequest self) => JsonConvert.SerializeObject(self, Converter.Settings);
-        public static string ToJson(this HostRecord self) => JsonConvert.SerializeObject(self, Converter.Settings);
-        public static string ToJson(this HostRecordPost self) => JsonConvert.SerializeObject(self, Converter.Settings);
-        public static string ToJson(this Configuration self) => JsonConvert.SerializeObject(self, Converter.Settings);
+        public static string ToJson(this IPSearchResults self) => JsonConvert.SerializeObject(self, Formatting.None, Converter.Settings);
+        public static string ToJson(this InfobloxNetworks self) => JsonConvert.SerializeObject(self, Formatting.None, Converter.Settings);
+        public static string ToJson(this InfobloxNetwork self) => JsonConvert.SerializeObject(self, Formatting.None, Converter.Settings);
+        public static string ToJson(this IpResult self) => JsonConvert.SerializeObject(self, Formatting.None, Converter.Settings);
+        public static string ToJson(this IpRequest self) => JsonConvert.SerializeObject(self, Formatting.None, Converter.Settings);
+        public static string ToJson(this HostRecord self) => JsonConvert.SerializeObject(self, Formatting.None, Converter.Settings);
+        public static string ToJson(this HostRecordPost self) => JsonConvert.SerializeObject(self, Formatting.None, Converter.Settings);
+        public static string ToJson(this Configuration self) => JsonConvert.SerializeObject(self, Formatting.None, Converter.Settings);
     }
     internal static class Converter
     {
